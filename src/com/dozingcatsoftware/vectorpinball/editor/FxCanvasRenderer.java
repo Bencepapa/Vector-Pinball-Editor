@@ -10,6 +10,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.ArcType;
 
@@ -18,7 +19,11 @@ import com.dozingcatsoftware.vectorpinball.editor.elements.EditableFieldElement;
 import com.dozingcatsoftware.vectorpinball.model.Color;
 import com.dozingcatsoftware.vectorpinball.model.Field;
 
+import static com.dozingcatsoftware.vectorpinball.util.Localization.localizedString;
+
 public class FxCanvasRenderer implements IEditableFieldRenderer {
+
+    static String IMAGE_PATH_PREFIX = "/com/dozingcatsoftware/vectorpinball/images/";
 
     private static final double DEFAULT_SCALE = 25;
     // Zoom levels greater than 2 result in poor performance using the simple
@@ -40,6 +45,10 @@ public class FxCanvasRenderer implements IEditableFieldRenderer {
     private Point dragStartPoint;
     private Point lastDragPoint;
 
+    private String BackgroundImagePath;
+    private Image BackgroundImage = null;
+    private double BackgroundImageScale = 0.0;
+
     public void setCanvas(Canvas c) {
         canvas = c;
         context = c.getGraphicsContext2D();
@@ -57,6 +66,17 @@ public class FxCanvasRenderer implements IEditableFieldRenderer {
 
     public void setUndoStack(UndoStack stack) {
         undoStack = stack;
+    }
+
+    public void loadImage(String ImagePath) {
+        BackgroundImagePath = ImagePath;
+        BackgroundImage = new Image(IMAGE_PATH_PREFIX + BackgroundImagePath);
+    }
+
+    public void calcBackgroundImageScale() {
+        if (BackgroundImage != null) {
+            BackgroundImageScale = canvas.getHeight() / BackgroundImage.getHeight();
+        }
     }
 
     private static Paint toFxPaint(int color) {
@@ -175,6 +195,12 @@ public class FxCanvasRenderer implements IEditableFieldRenderer {
     void draw() {
         context.setFill(javafx.scene.paint.Color.BLACK);
         context.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        if (BackgroundImage != null) {
+            context.drawImage(BackgroundImage, 0,0,
+                        Math.round(BackgroundImage.getWidth() * BackgroundImageScale), // * getRelativeScale()),
+                        Math.round(BackgroundImage.getHeight() * BackgroundImageScale)); // * getRelativeScale()));
+            //context.drawImage(BackgroundImage, 0, 0, canvas.getWidth(), canvas.getHeight());
+        }
         // When editing, use thin lines so they can be positioned accurately.
         // When playing, use the same 1/216 ratio as the mobile app.
         if (editableField != null) {

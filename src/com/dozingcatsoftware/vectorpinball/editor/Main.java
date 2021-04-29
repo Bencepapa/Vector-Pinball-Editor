@@ -71,6 +71,8 @@ public class Main extends Application {
         launch(args);
     }
 
+    static boolean LOAD_IMAGE = true;
+
     enum EditorState {
         EDITING,
         SAMPLE_GAME,
@@ -121,6 +123,9 @@ public class Main extends Application {
         undoStack.setEditableField(editableField);
 
         renderer = new FxCanvasRenderer();
+        if (LOAD_IMAGE) {
+            renderer.loadImage("background.png");
+        }
         renderer.setEditableField(editableField);
         renderer.setUndoStack(undoStack);
 
@@ -354,6 +359,7 @@ public class Main extends Application {
         createCanvas(BASE_CANVAS_WIDTH * renderer.getRelativeScale(),
                 BASE_CANVAS_HEIGHT * renderer.getRelativeScale());
         renderer.setCanvas(fieldCanvas);
+        renderer.calcBackgroundImageScale();
         renderer.doDraw();
     }
 
@@ -386,6 +392,7 @@ public class Main extends Application {
 
     void displayForEditing(Map<String, Object> fieldMap) {
         renderer.setCanvas(fieldCanvas);
+        renderer.calcBackgroundImageScale();
         stopGame();
         editableField.initFromProperties(fieldMap);
         renderer.doDraw();
@@ -648,7 +655,7 @@ public class Main extends Application {
         buttons.add(new ButtonType(localizedString("Don't Save"), ButtonBar.ButtonData.NO));
         buttons.add(new ButtonType(localizedString("Cancel"), ButtonBar.ButtonData.CANCEL_CLOSE));
 
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, header);
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.getButtonTypes().clear();
